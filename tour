@@ -1,11 +1,12 @@
+
 """
-ConsoleController: User interface for manually solving
-Anne Hoy's problems from the console.
+functions to run TOAH tours.
 """
 
 
-# Copyright 2014, 2017 Dustin Wehr, Danny Heap, Bogdan Simion,
-# Jacqueline Smith, Dan Zingaro
+# Copyright 2013, 2014, 2017, 2018 Gary Baumgartner, Danny Heap, Dustin Wehr,
+# Bogdan Simion, Jacqueline Smith, Dan Zingaro, Zain Kazmi,
+# Umair Farooqi, Haider Sajjad
 # Distributed under the terms of the GNU General Public License.
 #
 # This file is part of Assignment 1, CSC148, Winter 2018.
@@ -22,127 +23,99 @@ Anne Hoy's problems from the console.
 #
 # You should have received a copy of the GNU General Public License
 # along with this file.  If not, see <http://www.gnu.org/licenses/>.
+# Copyright 2013, 2014 Gary Baumgartner, Danny Heap, Dustin Wehr
 
 
-from toah_model import TOAHModel, IllegalMoveError
+# you may want to use time.sleep(delay_between_moves) in your
+# solution for 'if __name__ == "__main__":'
 
+import time
+from toah_model import TOAHModel
+import math
 
-def move(model, origin, dest):
-    """ Apply move from origin to destination in model.
+def tour_of_four_stools(model, delay_btw_moves=0.5, animate=False):
+    """Move a tower of cheeses from the first stool in model to the fourth.
 
-    May raise an IllegalMoveError.
-
-    @param TOAHModel model:
-        model to modify
-    @param int origin:
-        stool number (index from 0) of cheese to move
-    @param int dest:
-        stool number you want to move cheese to
+    @type model: TOAHModel
+        TOAHModel with tower of cheese on first stool and three empty
+        stools
+    @type delay_btw_moves: float
+        time delay between moves if console_animate is True
+    @type animate: bool
+        animate the tour or not
     @rtype: None
     """
-    try:
-        model.move(origin, dest)
-    except IllegalMoveError:
-        print("you cannot make this move")
+    if model.get_num_stools()== 3:
+        anne_hoy_three_stools(model,model.get_number_of_cheeses(),0,1,2,animate,delay_btw_moves)
+    else:
+        anne_hoy_four_stools(model,model.get_number_of_cheeses(),0,1,2,3,animate,delay_btw_moves)
 
+def anne_hoy_four_stools(model, n, from_stool,spare_stool1, spare_stool2, to_stool,animate,delay_btw_moves):
+    '''
+    '''
+    i = finding_i(n)
+    k = n-i
+    if n <= 2:
+        anne_hoy_three_stools(model, n, from_stool, spare_stool1, to_stool, animate,delay_btw_moves)
+    else:
+        anne_hoy_four_stools(model, i, from_stool, to_stool, spare_stool2, spare_stool1,animate,delay_btw_moves)
+        anne_hoy_three_stools(model, k, from_stool, spare_stool2, to_stool,animate,delay_btw_moves)
+        anne_hoy_four_stools(model, i, spare_stool1, from_stool, spare_stool2, to_stool,animate,delay_btw_moves)
 
-class ConsoleController:
-    """ Controller for text console.
-    """
+def anne_hoy_three_stools(model,n, from_stool, spare_stool , to_stool,animate, delay_btw_moves):
+    '''
+    '''
+    # Credit to Larry Zhang
+    # This is a modification of Larry Zhang's def hanoi_stack()
+    if n == 1:
+        model.move(from_stool, to_stool)
+        if animate == True:
+            print(model)
+            time.sleep(delay_btw_moves)
+    else:
+        anne_hoy_three_stools(model,n-1, from_stool, to_stool, spare_stool,animate, delay_btw_moves)
+        anne_hoy_three_stools(model,1, from_stool, spare_stool, to_stool, animate, delay_btw_moves)
+        anne_hoy_three_stools(model,n-1, spare_stool, from_stool, to_stool, animate, delay_btw_moves)
 
-    def __init__(self, number_of_cheeses, number_of_stools):
-        """ Initialize a new ConsoleController self.
-
-        @param ConsoleController self:
-        @param int number_of_cheeses:
-        @param int number_of_stools:
-        @rtype: None
-        """
+def finding_i(n):
+    l = []
+    for j in range(1,n):
+        l.append(j)
+    middle = 0
+    
+          
+    if len(l) % 2 == 0:
+        middle = int((len(l)+1)/2)
+    else:
+        if len(l) > 3:
+            middle = (len(l))//2
         
-        if isinstance(number_of_cheeses, int) and isinstance(number_of_stools, int):
-            self.number_of_cheeses = number_of_cheeses
-            self.number_of_stools = number_of_stools
-            self.model = TOAHModel(self.number_of_stools)
-            self.model.fill_first_stool(self.number_of_cheeses)
-            self.complete =  self.model._stools[0][:]
-            
         else:
-            print("Please enter a NUMBER of cheeses and a NUMBER of stools")
+            middle = (len(l)-1)//2
+                 
+    if len(l) > 8:
+        dec = int(n*0.2)
+        middle = l[dec]
         
-        
-        
+    if len(l) > 0:
+        i = n - l[int(middle)]
+    if len(l) <= 0:
+        i = 0
     
-
-    def play_loop(self):
-        """ Play Console-based game.
-
-        @param ConsoleController self:
-        @rtype: None
-
-        TODO:
-        -Start by giving instructions about how to enter moves (which is up to
-        you). Be sure to provide some way of exiting the game, and indicate
-        that in the instructions.
-        -Use python's built-in function input() to read a potential move from
-        the user/player. You should print an error message if the input does
-        not meet the specifications given in your instruction or if it denotes
-        an invalid move (e.g. moving a cheese onto a smaller cheese).
-        You can print error messages from this method and/or from
-        ConsoleController.move; it's up to you.
-        -After each valid move, use the method TOAHModel.__str__ that we've
-        provided to print a representation of the current state of the game.
-        """
         
-        flag = True
-        player_input = ''
-        orginial_stool = 0
-        destination_stool = 0
-        print("This is how you play.\nEnter from which stool you want to move to and its destination\nas an ordered pair, i.e. (cheese stool location, stool I want to move to), (0,1) means \nI want to move the cheese on stool 1 to stool 2: enter quit anytime to exit the game \nother wise we will keep playing")     
-        print()
-        print("here is the model of the game")
-        print(self.model)
+    return i
 
-        
-        while flag:
-            if self.complete == self.model._stools[self.number_of_stools-1]:
-                print("congradulations you won!!!")
-                flag = False
-            else:
-                player_input = input("please enter the ordere pair of your movement: ")
-                if player_input.lower() == 'quit':
-                    print('goodbye')
-                    flag = False
-    
-                else:
-                    r = player_input.split(',')
-                    try:
-                        orginial_stool = int(r[0][1:])
-                        destination_stool = int(r[1][:-1])
-                    except ValueError:
-                        print('Please enter the NUMBER of your source and destination stool')
-                    else:
-                        move(self.model,orginial_stool, destination_stool)
-                        print(self.model)
-                    
-                                    
-               
 if __name__ == '__main__':
- 
-    play = True
-    while play:
-        print('''Please Enter Number of stools and Number of Cheeses You Want to 
-        Play with''')          
-        try:
-            cheese = input('Number of Cheese:')
-            stools = input('Number of Stools:')
-            
-        except ValueError:
-            if cheese == 'quit' or stools == 'quit':
-                play = False
-            print("if you don't want to play enter quit")
-        else:
-            number_of_cheese = int(cheese)
-            number_of_stools = int(stools)
-            m = ConsoleController(number_of_cheese, number_of_stools)
-            m.play_loop()
-            play = False
+    num_cheeses = 10
+    delay_between_moves = 0.5
+    console_animate = True
+
+    # DO NOT MODIFY THE CODE BELOW.
+    four_stools = TOAHModel(4)
+    four_stools.fill_first_stool(number_of_cheeses=num_cheeses)
+
+    tour_of_four_stools(four_stools,
+                        animate=console_animate,
+                        delay_btw_moves=delay_between_moves)
+
+    print(four_stools.number_of_moves())
