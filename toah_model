@@ -55,6 +55,7 @@ class TOAHModel:
         #
         self._move_seq = MoveSequence([]) 
         self._number_of_stools = number_of_stools
+        self._number_of_cheese = 0
         self._stools = []
         
         
@@ -63,8 +64,6 @@ class TOAHModel:
                 
         # you must have _move_seq as well as any other attributes you choose
         # self._move_seq = MoveSequence([])
-    def get_num_stools(self):
-        return len(self._stools)
 
     def get_move_seq(self):
         """ Return the move sequence
@@ -205,21 +204,35 @@ class TOAHModel:
     def move(self, from_index: int, to_index: int):
         
         
-        top = len(self._stools[to_index]) - 1
+        if from_index == to_index:
+            raise IllegalMoveError("You can't make this move")
+            
+        if from_index < self.get_number_of_stools() \
+           and from_index >= 0 and to_index < self.get_number_of_stools() and to_index >= 0:
+            
+            if self._stools[from_index] != []:
+                
 
-        move_cheese = self.get_top_cheese(from_index)
-        self._stools[from_index].remove(move_cheese)
         
-        if self._stools[to_index] != []:
-            if self._stools[to_index][top].size < move_cheese.size:
-                self._stools[from_index].append(move_cheese)
-                raise IllegalMoveError("You can't make this move")
-            else:        
-                self._move_seq.add_move(from_index, to_index)               
-                self._stools[to_index].append(move_cheese)
+                move_cheese = self.get_top_cheese(from_index)
+                self._stools[from_index].remove(move_cheese)
+                
+                if self._stools[to_index] != []:
+                    top = len(self._stools[to_index]) - 1
+                    if self._stools[to_index][top].size < move_cheese.size:
+                        self._stools[from_index].append(move_cheese)
+                        raise IllegalMoveError("You can't make this move")
+                    else:        
+                        self._move_seq.add_move(from_index, to_index)               
+                        self._stools[to_index].append(move_cheese)
+                else:
+                    self._stools[to_index].append(move_cheese)
+                    self._move_seq.add_move(from_index, to_index)
+            else:
+                raise IllegalMoveError("You can't make this move")                    
         else:
-            self._stools[to_index].append(move_cheese)
-            self._move_seq.add_move(from_index, to_index)
+            raise IllegalMoveError("You can't make this move")
+            
             
         
     
@@ -229,6 +242,7 @@ class TOAHModel:
     def fill_first_stool(self, number_of_cheeses: int):
         """Fills the stool at index 0 with number_of_cheeses
         """
+        self._number_of_cheese = number_of_cheeses
         
         for i in range(number_of_cheeses, 0, -1):
             self._stools[0].append(Cheese(i))
@@ -241,12 +255,12 @@ class TOAHModel:
     def get_number_of_cheeses(self):
         """Returns total number of cheeses on all stools 
         """
-        count_cheeses = 0
+        '''count_cheeses = 0
         for i in range(len(self._stools)):
             for j in range(len(self._stools[i])):
-                count_cheeses += 1
+                count_cheeses += 1'''
                 
-        return count_cheeses
+        return self._number_of_cheese 
     
 
 class Cheese:
