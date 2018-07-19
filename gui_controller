@@ -140,8 +140,9 @@ class GUIController:
         """
         stool = self._stools[self._model.get_cheese_location(cheese)]
         stool_index = self.stool_index(stool)
+
         cheese = self._model.get_top_cheese(stool_index)
-        # print(stool, stool_index, cheese)
+
         if self._cheese_to_move is None:
             self._cheese_to_move = cheese
             self._cheese_to_move.highlight(True)
@@ -169,11 +170,15 @@ class GUIController:
                 self._model.get_cheese_location(self._cheese_to_move)]
             dest_stool_index = self.stool_index(dest_stool)
             origin_stool_index = self.stool_index(origin_stool)
+            
+
             if origin_stool_index != dest_stool_index:
                 top_cheese = self._model.get_top_cheese(dest_stool_index)
                 if top_cheese is None:
+
                     self.select_platform_for_move(dest_stool, dest_stool_index)
                 else:
+
                     self.select_platform_for_move(top_cheese, dest_stool_index)
 
     def select_platform_for_move(self, platform, stool_index):
@@ -187,16 +192,18 @@ class GUIController:
         @param int stool_index:
         @rtype: None
         """
+
+        
         if self._cheese_to_move is not None:
             try:
                 from_stool = self._model.get_cheese_location(
                     self._cheese_to_move)
+
                 self._model.move(from_stool, stool_index)
                 self._cheese_to_move.place(platform.x_center, platform.y_center
                                            - self.cheese_scale)
                 self.show_number_of_moves()
             except IllegalMoveError as e:
-                print(e)
                 self._blinking = True
                 for i in range(10):
                     self._cheese_to_move.highlight(i % 2 != 0)
