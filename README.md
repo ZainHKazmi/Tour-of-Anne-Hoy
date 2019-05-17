@@ -1,2 +1,2 @@
 # Tour-of-Anne-Hoy
-CSC148 2017 UTM Winter: Instructor: Dr. Daniel Zingaro
+Assignment 1 for CSC148 2017 UTM Winter: Instructor: Dr. Daniel Zingaro
